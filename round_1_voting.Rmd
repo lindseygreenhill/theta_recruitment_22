@@ -18,17 +18,30 @@ data <- read_csv("data/round1_voting.csv") %>%
 
 ```{r}
 
-data <- data %>%
+data_clean <- data %>%
   group_by(pnm_first_and_last_name) %>%
   summarise(avg_score = mean(score_1_5)) 
 
-# we have 104 left if you filter for above 3.5, we have 85 left if we filter for
-# above a 4
-
-data %>%
+data_filter_3.5_above <- data_clean %>%
   arrange(desc(avg_score)) %>%
-  filter(avg_score >= 4)
+  filter(avg_score >= 3.5)
 
+data_filter_3_3.5 <- data_clean %>%
+  arrange(desc(avg_score)) %>%
+  filter((avg_score > 3) & (avg_score < 3.5))
+
+data_filter_3_above <- data_clean %>%
+  arrange(desc(avg_score)) %>%
+  filter(avg_score > 3)
+
+# we have 104 left if you filter for > 3.5
+# we have 85 left if we filter for > 4
+
+print(paste("Number of PNMs for avg_score 3.5+: ", nrow(data_filter_3.5_above)))
+print(paste("Number of PNMs for avg_score 3 - 3.5: ", nrow(data_filter_3_3.5)))
+```
+
+```{r}
 hist <- data %>%
   arrange(desc(avg_score)) %>%
   ggplot(aes(x = avg_score)) +
