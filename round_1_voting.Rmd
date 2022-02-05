@@ -1,0 +1,39 @@
+---
+title: "round_1_voting"
+author: "Lindsey Greenhill"
+date: "2/5/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+
+data <- read_csv("data/round1_voting.csv") %>%
+  clean_names()
+
+```
+
+
+```{r}
+
+data <- data %>%
+  group_by(pnm_first_and_last_name) %>%
+  summarise(avg_score = mean(score_1_5)) 
+
+# we have 104 left if you filter for above 3.5, we have 85 left if we filter for
+# above a 4
+
+data %>%
+  arrange(desc(avg_score)) %>%
+  filter(avg_score >= 4)
+
+hist <- data %>%
+  arrange(desc(avg_score)) %>%
+  ggplot(aes(x = avg_score)) +
+  geom_histogram() +
+  geom_vline(xintercept = mean(data$avg_score), col = "red") +
+  theme_classic()
+```
+
