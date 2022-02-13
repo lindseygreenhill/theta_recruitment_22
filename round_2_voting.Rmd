@@ -1,0 +1,59 @@
+---
+title: "round_2_voting"
+author: "Daniela Garcia"
+date: "2/14/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+data <- read_csv("data/voting.csv") %>% clean_names()
+r2_pnms <- read_csv("data/r2_pnms.csv")
+no_votes <- c("")
+```
+
+
+```{r}
+# generate round 1 average votes
+data_r1 <- data %>% 
+  filter(round == "Round 1 Open House") %>%
+  group_by(pnm_first_and_last_name) %>%
+  summarize(pnm_first_and_last_name,
+            round,
+            score = mean(score_1_5),
+            vote_count = n(),
+            member_name = NA) %>%
+  unique() %>%
+  filter(pnm_first_and_last_name %in% r2_pnms$pnm_first_and_last_name) 
+
+# generate data frame with just round 2 votes
+data_r2 <- data %>%
+  filter(round == "Round 2 Coffee Chats") %>%
+  group_by(pnm_first_and_last_name) %>%
+  summarize(pnm_first_and_last_name,
+            round,
+            score = score_1_5,
+            vote_count = n(),
+            member_name = your_first_and_last_name) 
+
+# aggregate data frames
+data_r1_r2 <- rbind(data_r1, data_r2) %>%
+  group_by(pnm_first_and_last_name) %>%
+  summarize(total_avg_score = mean(score)) %>%
+  filter(!(pnm_first_and_last_name %in% no_votes)) %>%
+  arrange(desc(total_avg_score))
+
+# final pnms
+final_pnms <- data_r1_r2 
+```
+
+```{r}
+data_r1_r2 %>%
+  ggplot(aes(x = total_avg_score)) +
+  geom_histogram(fill = "gold") +
+  geom_vline(xintercept = mean(data_r1_r2$total_avg_score), col = "black") +
+  theme_classic()
+```
+
